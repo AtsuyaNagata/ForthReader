@@ -10,6 +10,8 @@ public:
 	int size() const;
 	const char* data() const;
 
+	//‘‚«‚İstaticŠÖ”
+	static void write(const char* filename, const char* data, int size);
 protected:
 	int mSize;
 	char* mData;

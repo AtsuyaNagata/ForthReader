@@ -59,3 +59,73 @@ void Element::setAttributeNumber(int n) {
 		mAttributes[i] = new Attribute();
 	}
 }
+
+
+int Element::childNumber() const {
+	return static_cast<int>(mChildren.size());
+}
+
+const Element* Element::child(int i) const {
+	return mChildren[i];
+}
+
+Element* Element::child(int i) {
+	return mChildren[i];
+}
+
+void Element::setChildNumber(int n) {
+	//今ある分は捨てる
+	for (unsigned i = 0; i < mChildren.size(); ++i) {
+		delete[] mChildren[i];
+	}
+	mChildren.resize(n);
+	for (int i = 0; i < n; ++i) {
+		mChildren[i] = new Element();
+	}
+}
+
+const string* Element::name() const {
+	return &mName;
+}
+
+void Element::setName(const char* name) {
+	mName = name;
+}
+
+//再帰関数
+void Element::convertToString(string* out, int indent) const {
+	//インデントの数だけタブを書く
+	for (int i = 0; i < indent; ++i) {
+		*out += '\t';
+	}
+	//タグ開始とエレメント名
+	*out += '<';
+	*out += mName;
+	//アトリビュート書き込み
+	for (unsigned i = 0; i < mAttributes.size(); ++i) {
+		if (mAttributes[i]) {
+			*out += ' '; //スペース
+			*out += *(mAttributes[i]->name());	//開始タグ内のアトリビュート集
+			*out += "=\"";						//「="」を記入
+			*out += *(mAttributes[i]->value());	//値を入れる
+			*out += '"';
+		}
+	}
+	*out += ">\r\n"; //開始タグ終わり
+	//子に流す
+	for (unsigned i = 0; i < mChildren.size(); ++i) {
+		//子の要素があれば
+		if (mChildren[i]) {
+			//子のエレメントを展開しておく。この時、インデントを下げることでかっこつける
+			mChildren[i]->convertToString(out, indent + 1);
+		}
+	}
+	//インデントの数だけタブを書く
+	for (int i = 0; i < indent; ++i) {
+		*out += '\t';
+	}
+	//終了タグ
+	*out += "</";
+	*out += mName;
+	*out += ">\r\n";
+}

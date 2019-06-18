@@ -34,3 +34,13 @@ int File::size() const{
 const char* File::data() const {
 	return mData;
 }
+
+void File::write(const char* filename, const char* data, int size) {
+	ofstream out(filename, ofstream::binary);
+	if (out) {
+		out.write(data, size);
+	}
+	else {
+		exit(1);
+	}
+}
