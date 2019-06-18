@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Reader_Lib">
+      <UniqueIdentifier>{73fe2c46-2dbd-4d43-b830-520caac48d14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reader_Lib\XMLReader">
+      <UniqueIdentifier>{d5ee1a24-478f-4dec-a46a-4b533d7203e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileSystem">
+      <UniqueIdentifier>{971fa653-5461-4127-8a83-e5ad4b023eab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Reader_Lib\XMLReader\Attribute.cpp">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClCompile>
+    <ClCompile Include="Reader_Lib\XMLReader\Element.cpp">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClCompile>
+    <ClCompile Include="Reader_Lib\XMLReader\Document.cpp">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem\File.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Reader_Lib\XMLReader\Tag.cpp">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Reader_Lib\XMLReader\Attribute.h">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\XMLReader\Element.h">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\XMLReader\Document.h">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem\File.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\XMLReader\Tag.h">
+      <Filter>Reader_Lib\XMLReader</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
