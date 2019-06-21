@@ -1,0 +1,16 @@
+<Start name="Sample">
+    <Sample value="00">
+      <AAA value="---">
+    </Sample>
+    <Sample value="01"></Sample>
+</Sample>
+
+<Start name="Sample2">
+    <Sample value="10"></Sample>
+    <Sample value="11"></Sample>
+</Sample>
+
+  <Start name="Sample2">
+    <Sample value="10"></Sample>
+    <Sample value="11"></Sample>
+</Sample>

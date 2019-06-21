@@ -15,17 +15,19 @@ Document::Document(const char* filename) : mRoot(0) {
 	Tag tag("<ROOT>");
 	const char* begin = file.data();
 	const char* end = begin + file.size();
+	//Elementには全テキストの開始地点と終了地点を渡す（beginは変更可能のためポインタで渡す）
 	mRoot = new Element(&tag, &begin, end);
 }
 
 Document::~Document() {
-	delete[] mRoot;
+	delete mRoot;
 }
 
 void Document::write(const char* filename) const {
 	string str;
 	//ルート要素は無視してかきこみ
 	for (int i = 0; i < mRoot->childNumber(); ++i) {
+		//「child」の書き込み関数を実行すると、「child」が所有する「child」の書き込み関数を再帰的に実行する
 		mRoot->child(i)->convertToString(&str, 0);
 	}
 	File::write(filename, str.c_str(), static_cast<int>(str.size()));

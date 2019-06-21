@@ -56,6 +56,12 @@ s = 他の条件に引っかからない残りの文字
 */
 
 
+//<ROOT>を生成する際に用いる
+Tag::Tag(const char* name) :
+	mName(name),
+	mType(TYPE_BEGIN) {
+}
+
 Tag::Tag(const char** p, const char* e) :
 	mType(TYPE_BEGIN)
 {
@@ -81,8 +87,8 @@ Tag::Tag(const char** p, const char* e) :
 				if (c == '>') {
 					end = true;								//終了準備
 				}
-				else if (isNormalChar(c)) {
-					mName += c;
+				else if (isNormalChar(c)) {		//許可のある文字だったら
+					mName += c;					//文字をぶち込む
 				}
 				else {
 					m = 2;									//エレメント名の処理終了
@@ -135,7 +141,6 @@ Tag::Tag(const char** p, const char* e) :
 			break;
 		}
 	}
-
 }
 
 Tag::~Tag() {

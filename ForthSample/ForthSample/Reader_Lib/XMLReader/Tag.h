@@ -7,6 +7,8 @@ using namespace std;
 class Element;
 class Attribute;
 
+//Elementに用いられるクラス
+//文字の解析とアトリビュートの獲得を行う
 class Tag
 {
 public:
