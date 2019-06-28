@@ -141,3 +141,17 @@ void Element::convertToString(string* out, int indent) const {
 	*out += mName;
 	*out += ">\r\n";
 }
+
+
+void printElement(Element* e) {
+	for (int i = 0; i < e->childNumber(); ++i) {
+		printf("%s:   ", (*e->child(i)->name()).c_str());
+		for (int j = 0; j < e->child(i)->attributeNumber(); ++j) {
+			printf("Attribute %d: name=%s, value=%s    ", j + 1, (*e->child(i)->attribute(j)->name()).c_str(), (*e->child(i)->attribute(j)->value()).c_str());
+		}
+		printf("\n");
+		if (e->child(i)->childNumber() > 0) {
+			printElement(e->child(i));
+		}
+	}
+}

@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="FileSystem\File.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Reader_Lib\ForthReader\MemoryManager.cpp" />
     <ClCompile Include="Reader_Lib\XMLReader\Attribute.cpp" />
     <ClCompile Include="Reader_Lib\XMLReader\Document.cpp" />
     <ClCompile Include="Reader_Lib\XMLReader\Element.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileSystem\File.h" />
+    <ClInclude Include="Reader_Lib\ForthReader\MemoryManager.h" />
     <ClInclude Include="Reader_Lib\XMLReader\Attribute.h" />
     <ClInclude Include="Reader_Lib\XMLReader\Document.h" />
     <ClInclude Include="Reader_Lib\XMLReader\Element.h" />

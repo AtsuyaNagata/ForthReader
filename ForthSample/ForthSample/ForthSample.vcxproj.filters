@@ -10,6 +10,9 @@
     <Filter Include="FileSystem">
       <UniqueIdentifier>{971fa653-5461-4127-8a83-e5ad4b023eab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Reader_Lib\ForthReader">
+      <UniqueIdentifier>{68175089-3b9b-451d-8580-971f0938bb50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -28,6 +31,9 @@
     <ClCompile Include="Reader_Lib\XMLReader\Tag.cpp">
       <Filter>Reader_Lib\XMLReader</Filter>
     </ClCompile>
+    <ClCompile Include="Reader_Lib\ForthReader\MemoryManager.cpp">
+      <Filter>Reader_Lib\ForthReader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Reader_Lib\XMLReader\Attribute.h">
@@ -44,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="Reader_Lib\XMLReader\Tag.h">
       <Filter>Reader_Lib\XMLReader</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\ForthReader\MemoryManager.h">
+      <Filter>Reader_Lib\ForthReader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

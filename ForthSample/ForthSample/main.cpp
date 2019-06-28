@@ -3,7 +3,18 @@
 #include"Reader_Lib/XMLReader/Document.h"
 #include"Reader_Lib/XMLReader/Element.h"
 #include"Reader_Lib/XMLReader/Attribute.h"
+#include"Reader_Lib/ForthReader/MemoryManager.h"
 using namespace std;
+
+int main() {
+	MemoryManager::create();
+	unsigned char p[4] = { 0x00, 0x01, 0x02, 0xff };
+	MemoryManager::instance()->push(p);
+
+	printf("%d\n", MemoryManager::instance()->pop());
+}
+
+/* XMLリーダの使用
 
 void printElement(Element* e);
 
@@ -14,16 +25,4 @@ int main() {
 	printElement(temporary);
 	return 0;
 }
-
-void printElement(Element *e) {
-	for (int i = 0; i < e->childNumber(); ++i) {
-		printf("%s:   ", (*e->child(i)->name()).c_str());
-		for (int j = 0; j < e->child(i)->attributeNumber(); ++j) {
-			printf("Attribute %d: name=%s, value=%s    ", j+1, (*e->child(i)->attribute(j)->name()).c_str(), (*e->child(i)->attribute(j)->value()).c_str());
-		}
-		printf("\n");
-		if (e->child(i)->childNumber() > 0) {
-			printElement(e->child(i));
-		}
-	}
-}
+*/
