@@ -34,6 +34,12 @@
     <ClCompile Include="Reader_Lib\ForthReader\MemoryManager.cpp">
       <Filter>Reader_Lib\ForthReader</Filter>
     </ClCompile>
+    <ClCompile Include="Reader_Lib\ForthReader\ForthExecutor.cpp">
+      <Filter>Reader_Lib\ForthReader</Filter>
+    </ClCompile>
+    <ClCompile Include="Reader_Lib\ForthReader\ForthReader.cpp">
+      <Filter>Reader_Lib\ForthReader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Reader_Lib\XMLReader\Attribute.h">
@@ -52,6 +58,12 @@
       <Filter>Reader_Lib\XMLReader</Filter>
     </ClInclude>
     <ClInclude Include="Reader_Lib\ForthReader\MemoryManager.h">
+      <Filter>Reader_Lib\ForthReader</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\ForthReader\ForthExecutor.h">
+      <Filter>Reader_Lib\ForthReader</Filter>
+    </ClInclude>
+    <ClInclude Include="Reader_Lib\ForthReader\ForthReader.h">
       <Filter>Reader_Lib\ForthReader</Filter>
     </ClInclude>
   </ItemGroup>

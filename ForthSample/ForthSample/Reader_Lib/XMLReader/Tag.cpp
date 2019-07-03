@@ -2,7 +2,6 @@
 #include "FileSystem/File.h"
 #include "Reader_Lib/XMLReader/Attribute.h"
 
-
 //a-z,A-Z,0-9,_のどれかかを調べる関数
 //わかりやすいが遅い。高速化の方法を検討してみよう。
 bool static isNormalChar(char c) {
@@ -20,8 +19,6 @@ bool static isNormalChar(char c) {
 	}
 	return false;
 }
-
-
 
 //状態遷移表。最低限なので、エラーには異常なほど寛容な作りになっている。
 /*
