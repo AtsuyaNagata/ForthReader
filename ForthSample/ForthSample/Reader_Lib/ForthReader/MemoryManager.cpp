@@ -60,7 +60,7 @@ void MemoryManager::destroy() {
 	mMemoryInstance = 0;
 }
 
-//データはビックエンディアンで扱うことにする 4バイトづつ入れる事に注意
+//データはビッグエンディアンで扱うことにする。4バイトづつ入れる事に注意
 void MemoryManager::push(unsigned char* p) {
 	//現在の地点から4バイト分読み込む
 	mStack[0] = p[0];
@@ -71,13 +71,24 @@ void MemoryManager::push(unsigned char* p) {
 	mStack += 4;
 }
 
+void MemoryManager::push(int num) {
+	char* p = reinterpret_cast<char*>(&num);
+	//現在の地点から4バイト分読み込む
+	mStack[3] = p[3];
+	mStack[2] = p[2];
+	mStack[1] = p[1];
+	mStack[0] = p[0];
+	//スタックポインタを次に備えておく
+	mStack += 4;
+}
+
 unsigned MemoryManager::pop() {
 	//スタックは下げる。ポップされた地点の掃除はしない
 	mStack -= 4;
 	//unsignedにして返す
-	unsigned u = mStack[0] << 24;
-	u |= mStack[1] << 16;
-	u |= mStack[2] << 8;
-	u |= mStack[3];
+	unsigned u = mStack[3] << 24;
+	u |= mStack[2] << 16;
+	u |= mStack[1] << 8;
+	u |= mStack[0];
 	return u;
 }

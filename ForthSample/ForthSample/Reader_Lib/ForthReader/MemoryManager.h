@@ -11,6 +11,7 @@ public:
 
 	//4バイトずつプッシュポップする予定
 	void push(unsigned char *p);
+	void push(int p);
 	unsigned pop();
 
 private:

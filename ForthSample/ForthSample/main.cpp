@@ -4,12 +4,14 @@
 #include"Reader_Lib/XMLReader/Element.h"
 #include"Reader_Lib/XMLReader/Attribute.h"
 #include"Reader_Lib/ForthReader/MemoryManager.h"
+#include"Reader_Lib/ForthReader/ForthReader.h"
 using namespace std;
 
 int main() {
 	MemoryManager::create();
-	unsigned char p[4] = { 0x00, 0x01, 0x02, 0xff };
-	MemoryManager::instance()->push(p);
+	ForthReader reader;
+
+	reader.read();
 
 	printf("%d\n", MemoryManager::instance()->pop());
 }

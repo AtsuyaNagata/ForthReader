@@ -6,15 +6,20 @@ class File;
 class ForthReader
 {
 public:
-	ForthReader();
-	~ForthReader();
-
 	enum ReadStatus {
 		READ_LINE,
 		READ_FILE,
 
 		READ_NONE
 	};
+
+	ForthReader();
+	ForthReader(const char *p);
+
+	void read();
+	void readForth(const char *);
+
+	~ForthReader();
 
 private:
 	File* mFile;
