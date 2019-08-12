@@ -9,9 +9,6 @@ using namespace std;
 
 int main() {
 	MemoryManager::create();
-	ForthReader reader;
-
-	reader.read();
 
 	printf("%d\n", MemoryManager::instance()->pop());
 }

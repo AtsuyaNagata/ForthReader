@@ -3,20 +3,42 @@
 #include "FileSystem/File.h"
 #include <iostream>
 
-//0-9のどれかかを調べる関数
-bool static isNumber(char c) {
-	return 
-		(c < '0') ? false :
-		(c > '9') ? false : true;
-}
+#define ORDERSIZE 10
 
+//0-9のどれかかを調べるマン
+bool static isNumber(char c) {
+	return (c >= '0' && c <= '9');
+}
+//文字列かどうかを調べるマン
 bool static isCharacter(char c) {
 	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' );
 }
+//演算子を見つけるマン
+bool static isOperator(char c) {
+	return ((c == '+') || (c == '-') || (c == '*') || (c == '/'));
+}
+
+//コマンドの処理群
+void const voidCmd(int, char**);
+void const pulusCmd(int, char**);
+void const minusCmd(int, char**);
+void const multipleCmd(int, char**);
+void const divideCmd(int, char**);
+void const printCmd(int, char**);
+void const forCmd(int, char**);
 
 //デバッグようかなー？
+
 ForthReader::ForthReader() :
-	mFile(0)
+	mFile(0),
+	forthCmd{
+		{"+", pulusCmd},
+		{"-", minusCmd},
+		{"*", multipleCmd},
+		{"/", divideCmd},
+		{".", printCmd},
+		{"for", forCmd}
+	}
 {
 	mStatus = READ_LINE;
 }
@@ -35,6 +57,7 @@ ForthReader::~ForthReader() {
 	}
 }
 
+
 void ForthReader::read()
 {
 	//ファイルからの読み込み
@@ -43,6 +66,7 @@ void ForthReader::read()
 	}
 	//標準入力からの読み込み
 	else if (mStatus == ForthReader::ReadStatus::READ_LINE) {
+		//可変になるような調正が必要
 		char line[30];
 		//ファイルディスクリプタは標準入力
 		fgets(line, sizeof(line), stdin);
@@ -52,9 +76,10 @@ void ForthReader::read()
 
 void ForthReader::readForth(const char* source)
 {
-	//シーケンスモード
-	int m = 0;
 
+
+
+	/*
 	const char* p = source;
 	while (*p != '\0') {
 		char c = *p;
@@ -72,5 +97,20 @@ void ForthReader::readForth(const char* source)
 			}
 			MemoryManager::instance()->push(num);
 		}
+		else if (isOperator(c)) {
+			char cmd = ((c == '+') * 1 + ((c == '-') * 2) + ((c == '*') * 3) + (c == '/') * 4);
+			MemoryManager::instance()->insertOrder(cmd);
+
+		}
+		else if (isCharacter(c)) {
+			int sum = c;
+			const char* text = p;
+			while (isCharacter(*text)) {
+				sum += *text;
+			}
+			specificOrder(sum, text);
+		}
+		
 	}
+	*/
 }

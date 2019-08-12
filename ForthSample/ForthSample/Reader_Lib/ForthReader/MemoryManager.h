@@ -9,6 +9,10 @@ public:
 	static void create();
 	static void destroy();
 
+	//命令を書き込みする命令
+	void insertOrder(char);
+	void readOrder();
+
 	//4バイトずつプッシュポップする予定
 	void push(unsigned char *p);
 	void push(int p);

@@ -92,3 +92,8 @@ unsigned MemoryManager::pop() {
 	u |= mStack[0];
 	return u;
 }
+
+void MemoryManager::insertOrder(char order) {
+	*mCmdMem = order;
+	mCmdMem++;
+}
