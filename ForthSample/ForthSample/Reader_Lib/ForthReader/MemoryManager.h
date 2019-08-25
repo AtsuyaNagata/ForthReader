@@ -9,14 +9,21 @@ public:
 	static void create();
 	static void destroy();
 
-	//命令を書き込みする命令
-	void insertOrder(char);
-	void readOrder();
+	void write(const char* data);
+	void writeCurrent(const char* data);
+	char* memHead() {
+		return mMemory;
+	}
+	char* readCurrent() {
+		return pCurrent;
+	}
+	bool isStackErr() {
+		return mStackErr;
+	}
 
-	//4バイトずつプッシュポップする予定
-	void push(unsigned char *p);
-	void push(int p);
-	unsigned pop();
+	void push(int);
+	void push(float);
+	float pop();
 
 private:
 	MemoryManager();
@@ -26,15 +33,14 @@ private:
 	static MemoryManager* mMemoryInstance;
 
 	//メモリー系のメンバ
-	unsigned char *mMemory;
-	unsigned char *mCmdMem;
-	unsigned char *mDataMem;
-	unsigned char *mEnd;
+	char *mMemory;
+	char *mEnd;
 
-	//スタックポインタ
-	unsigned char* mStack;
-	//命令領域のポインタ
-	unsigned char* mPC;
+	//動かしてもよいポインタ
+	char* pCurrent;
+
+	//オーバーフロー、アンダーフローを検知するフラグ
+	bool mStackErr;
 };
 
 #endif

@@ -14,31 +14,18 @@ void emergencyExit() {
 MemoryManager* MemoryManager::mMemoryInstance = 0;
 
 MemoryManager::MemoryManager() :
-	mMemory(0)
+	mMemory(0),
+	mStackErr(false)
 {
-	//メモリ文のバイト持ってくる
-	mMemory = new unsigned char[FORTH_MEMORY];
-	//命令領域を総メモリの半分とし、もう半分は記憶領域とする
-	mCmdMem = mMemory;
-	//記憶領域の先頭ポインタ
-	mDataMem = &mMemory[FORTH_MEMORY / 2 - 1];
-	//終了ポインタ(この地点を参照したらアウト)
-	mEnd = &mMemory[FORTH_MEMORY];
-
-	//スタックポインタを最初の地点にしておく
-	mStack = mDataMem;
-	//PCを先頭に持っていく
-	mPC = mCmdMem;
+	mMemory = new char[FORTH_MEMORY];
+	mEnd = &mMemory[FORTH_MEMORY];		//終了ポインタ(この地点を参照したらアウト)
+	pCurrent = mMemory;
 }
 
 MemoryManager::~MemoryManager() {
 	delete[] mMemory;
 	//再利用の可能性を徹底的につぶす
 	mMemory = 0;
-	mCmdMem = 0;
-	mDataMem = 0;
-	mStack = 0;
-	mPC = 0;
 }
 
 void MemoryManager::create() {
@@ -60,40 +47,40 @@ void MemoryManager::destroy() {
 	mMemoryInstance = 0;
 }
 
-//データはビッグエンディアンで扱うことにする。4バイトづつ入れる事に注意
-void MemoryManager::push(unsigned char* p) {
-	//現在の地点から4バイト分読み込む
-	mStack[0] = p[0];
-	mStack[1] = p[1];
-	mStack[2] = p[2];
-	mStack[3] = p[3];
-	//スタックポインタを次に備えておく
-	mStack += 4;
+void MemoryManager::push(int param) {
+	if (pCurrent + 4 > mEnd) {
+		mStackErr = true;
+		return;
+	}
+	char* p = reinterpret_cast<char*>(&param);
+	pCurrent[0] = p[0];
+	pCurrent[1] = p[1];
+	pCurrent[2] = p[2];
+	pCurrent[3] = p[3];
+	pCurrent += 4;
+	mStackErr = false;
 }
 
-void MemoryManager::push(int num) {
-	char* p = reinterpret_cast<char*>(&num);
-	//現在の地点から4バイト分読み込む
-	mStack[3] = p[3];
-	mStack[2] = p[2];
-	mStack[1] = p[1];
-	mStack[0] = p[0];
-	//スタックポインタを次に備えておく
-	mStack += 4;
+void MemoryManager::push(float param) {
+	if (pCurrent + 4 > mEnd) {
+		mStackErr = true;
+		return;
+	}
+	char* p = reinterpret_cast<char*>(&param);
+	pCurrent[0] = p[0];
+	pCurrent[1] = p[1];
+	pCurrent[2] = p[2];
+	pCurrent[3] = p[3];
+	pCurrent += 4;
+	mStackErr = false;
 }
 
-unsigned MemoryManager::pop() {
-	//スタックは下げる。ポップされた地点の掃除はしない
-	mStack -= 4;
-	//unsignedにして返す
-	unsigned u = mStack[3] << 24;
-	u |= mStack[2] << 16;
-	u |= mStack[1] << 8;
-	u |= mStack[0];
-	return u;
-}
-
-void MemoryManager::insertOrder(char order) {
-	*mCmdMem = order;
-	mCmdMem++;
+float MemoryManager::pop(){
+	if (pCurrent - 4 < mMemory) {
+		mStackErr = true;
+		return 0;
+	}
+	pCurrent -= 4;
+	mStackErr = false;
+	return *reinterpret_cast<float*>(pCurrent);
 }
