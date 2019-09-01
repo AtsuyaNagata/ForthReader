@@ -1,7 +1,8 @@
 #ifndef FORTH_READER_H_2019_7_3_
 #define FORTH_READER_H_2019_7_3_
 
-#define MAX_CMDNUMBER 8
+#define MAX_CMD_VALUE 5
+#define MAX_CONTROL_VALUE 4
 
 class File;
 
@@ -25,6 +26,8 @@ public:
 	void readForth(const char *);
 	//コマンドの解析、実行
 	int executCmd(const char*);
+	//制御文の解析、実行
+	int executControl(const char*, const char*);
 
 	~ForthReader();
 
@@ -39,7 +42,12 @@ private:
 	{
 		const char* name;
 		int const (*func)();
-	} forthCmd[MAX_CMDNUMBER];
+	} forthCmd[MAX_CMD_VALUE];
+	struct
+	{
+		const char* name;
+		int const (*func)(const char* cmdName);
+	} controlCmd[MAX_CONTROL_VALUE];
 };
 
 #endif

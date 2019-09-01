@@ -3,8 +3,7 @@
 #include "FileSystem/File.h"
 #include <iostream>
 
-#define MAX_CMDNUMBER 6
-#define MAX_CMDLENGTH 2
+#define MAX_CMDLENGTH 4
 
 //0-9のどれかかを調べるマン
 bool static isNumber(char c) {
@@ -60,10 +59,10 @@ int const minusCmd();
 int const multipleCmd();
 int const divideCmd();
 int const printCmd();
-int const ifCmd();
-int const thenCmd();
-int const DoCmd();
-int const LoopCmd();
+int const voidCmd(const char*);
+int const ifCmd(const char*);
+int const elseCmd(const char*);
+int const DoCmd(const char*);
 
 //デバッグようかなー？
 ForthReader::ForthReader() :
@@ -73,9 +72,12 @@ ForthReader::ForthReader() :
 		{"-", minusCmd},
 		{"*", multipleCmd},
 		{"/", divideCmd},
-		{".", printCmd},
+		{".", printCmd}
+	},
+	controlCmd{
 		{"if", ifCmd},
-		{"then", thenCmd},
+		{"else", elseCmd},
+		{"then", voidCmd},
 		{"Do", DoCmd}
 	}
 {
@@ -90,8 +92,12 @@ ForthReader::ForthReader(const char* name) :
 		{"-", minusCmd},
 		{"*", multipleCmd},
 		{"/", divideCmd},
-		{".", printCmd},
+		{".", printCmd}
+	},
+	controlCmd{
 		{"if", ifCmd},
+		{"else", elseCmd},
+		{"then", voidCmd},
 		{"Do", DoCmd}
 	}
 {
@@ -115,7 +121,7 @@ void ForthReader::read()
 	//標準入力からの読み込み
 	else if (mStatus == ForthReader::ReadStatus::READ_LINE) {
 		//TODO:可変になるような調正が必要
-		char line[30];
+		char line[100];
 		//ファイルディスクリプタは標準入力
 		printf("input : ");
 		fgets(line, sizeof(line), stdin);
@@ -129,7 +135,7 @@ void ForthReader::readForth(const char* source)
 
 	const char* p = source;
 	char cmd[MAX_CMDLENGTH + 1];
-	int i = 0, j = 0;
+	int i = 0, j = 0, temp = 0;
 	while (p[i] != '\0') {
 		if (isNumber(p[i])) {
 			mem->push(static_cast<float>(CharacterToNumber(&p[i])));
@@ -150,9 +156,15 @@ void ForthReader::readForth(const char* source)
 			}
 			
 			
-			if (executCmd(cmd)) {	//もしエラーが見つかっていたら強制終了
-				return;				//エラー内容の出力についてはexectCmdが責任を持つ
+			if(0 > (temp = executControl(&p[i], cmd))){
+				if (executCmd(cmd)) {	//もしエラーが見つかっていたら強制終了
+					return;				//エラー内容の出力についてはexectCmdが責任を持つ
+				}
 			}
+			else {
+				i += temp;
+			}
+			
 		}
 		i = i + 1;
 	}
@@ -162,7 +174,7 @@ void ForthReader::readForth(const char* source)
 int ForthReader::executCmd(const char* cmdName) {
 	int errType = 0;
 	//コマンドの数や文字数はそこまで大きくないので2重ループもおｋ
-	for (int i = 0; i < MAX_CMDNUMBER; ++i) {		//定数を何とかしたいけど、思いつかないから妥協
+	for (int i = 0; i < MAX_CMD_VALUE; ++i) {		//定数を何とかしたいけど、思いつかないから妥協
 		//printf("cmdName = %s  forthCmd[%d].name = %s\n", cmdName, i, forthCmd[i].name); //チェック用
 		if (!strcmp(forthCmd[i].name, cmdName)) {	//一致した時実行
 			if (errType = forthCmd[i].func() != 0) {
@@ -178,10 +190,18 @@ int ForthReader::executCmd(const char* cmdName) {
 			}
 		}
 	}
-	printf("%s is not defined\n", cmdName);
-	return 1;
+	printf("%s is not defined", cmdName);
+	return 2;
 }
 
+int ForthReader::executControl(const char* source, const char* cmdName) {
+	for (int i = 0; i < MAX_CONTROL_VALUE; ++i) {
+		if (!strcmp(controlCmd[i].name, cmdName)) {
+			return controlCmd[i].func(source);
+		}
+	}
+	return -1;
+}
 
 //何もしない事が保証されたコマンド関数
 int const voidCmd() {
@@ -245,26 +265,65 @@ int const printCmd() {
 	return 0;
 }
 
-int const ifCmd() {
+int const voidCmd(const char* source) {
+	return 0;
+}
+
+//sourceは先頭ポインタではなく、現在読んでいる地点のポインタ
+int const ifCmd(const char* source) {
 	int ifBuff = MemoryManager::instance()->pop();
-	if (ifBuff) {
-		//コードスキップ機能もしくはコードロック
+	if (ifBuff) {	//trueの時
+		return 0;
 	}
 	else {
-
+		for (int i = 0; source[i] != '\0'; ++i) {
+			if (source[i] == 't') {
+				if (source[i + 1] == 'h') {
+					if (source[i + 2] == 'e') {
+						if (source[i + 3] == 'n') {
+							if (isSpCharacter(source[i + 4])) {
+								return i + 4;
+							}
+						}
+					}
+				}
+			}
+			if (source[i] == 'e') {
+				if (source[i + 1] == 'l') {
+					if (source[i + 2] == 's') {
+						if (source[i + 3] == 'e') {
+							if (isSpCharacter(source[i + 4])) {
+								return i + 4;
+							}
+						}
+					}
+				}
+			}
+		}
+		printf("then or else is not found\n");
 	}
 
-	return 0;
+	return -1;
 }
 
-int const thenCmd() {
-	return 0;
+int const elseCmd(const char* source) {
+	for (int i = 0; source[i] != '\0'; ++i) {
+		if (source[i] == 't') {
+			if (source[i + 1] == 'h') {
+				if (source[i + 2] == 'e') {
+					if (source[i + 3] == 'n') {
+						if (isSpCharacter(source[i + 4])) {
+							return i + 4; 
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("then is not found\n");
+	return -1;
 }
 
-int const DoCmd() {
-	return 0;
-}
-
-int const LoopCmd() {
+int const DoCmd(const char* source) {
 	return 0;
 }
