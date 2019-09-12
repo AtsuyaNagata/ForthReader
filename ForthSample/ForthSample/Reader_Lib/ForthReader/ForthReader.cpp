@@ -63,6 +63,7 @@ int const voidCmd(const char*);
 int const ifCmd(const char*);
 int const elseCmd(const char*);
 int const DoCmd(const char*);
+int const LoopCmd(const char*);
 
 //デバッグようかなー？
 ForthReader::ForthReader() :
@@ -78,7 +79,8 @@ ForthReader::ForthReader() :
 		{"if", ifCmd},
 		{"else", elseCmd},
 		{"then", voidCmd},
-		{"Do", DoCmd}
+		{"Do", DoCmd},
+		{"LOOP", LoopCmd}
 	}
 {
 	mStatus = READ_LINE;
@@ -98,7 +100,8 @@ ForthReader::ForthReader(const char* name) :
 		{"if", ifCmd},
 		{"else", elseCmd},
 		{"then", voidCmd},
-		{"Do", DoCmd}
+		{"Do", DoCmd},
+		{"LOOP", LoopCmd}
 	}
 {
 	mStatus = READ_FILE;
@@ -154,17 +157,11 @@ void ForthReader::readForth(const char* source)
 				}
 				cmd[j] = p[i];
 			}
-			
-			
-			if(0 > (temp = executControl(&p[i], cmd))){
-				if (executCmd(cmd)) {	//もしエラーが見つかっていたら強制終了
-					return;				//エラー内容の出力についてはexectCmdが責任を持つ
-				}
+
+			i += executControl(&p[i], cmd);
+			if (executCmd(cmd)) {		//もしエラーが見つかっていたら強制終了
+				return;
 			}
-			else {
-				i += temp;
-			}
-			
 		}
 		i = i + 1;
 	}
@@ -172,26 +169,22 @@ void ForthReader::readForth(const char* source)
 
 //コマンド確定、実行するマン
 int ForthReader::executCmd(const char* cmdName) {
-	int errType = 0;
 	//コマンドの数や文字数はそこまで大きくないので2重ループもおｋ
 	for (int i = 0; i < MAX_CMD_VALUE; ++i) {		//定数を何とかしたいけど、思いつかないから妥協
 		//printf("cmdName = %s  forthCmd[%d].name = %s\n", cmdName, i, forthCmd[i].name); //チェック用
 		if (!strcmp(forthCmd[i].name, cmdName)) {	//一致した時実行
-			if (errType = forthCmd[i].func() != 0) {
-				switch (errType) {
-				case 1:
-					printf("Stack Error\n");
-					return 1;
-					break;
-				}
-			}
-			else {
-				return 0;
-			}
+			forthCmd[i].func();
+			return MemoryManager::instance()->checkError();
+		}
+	}
+	for (int i = 0; i < MAX_CONTROL_VALUE; ++i) {
+		if (!strcmp(controlCmd[i].name, cmdName)) {
+			return MemoryManager::instance()->checkError();
+			return 0;
 		}
 	}
 	printf("%s is not defined", cmdName);
-	return 2;
+	return 1;
 }
 
 int ForthReader::executControl(const char* source, const char* cmdName) {
@@ -200,7 +193,7 @@ int ForthReader::executControl(const char* source, const char* cmdName) {
 			return controlCmd[i].func(source);
 		}
 	}
-	return -1;
+	return 0;
 }
 
 //何もしない事が保証されたコマンド関数
@@ -282,7 +275,11 @@ int const ifCmd(const char* source) {
 					if (source[i + 2] == 'e') {
 						if (source[i + 3] == 'n') {
 							if (isSpCharacter(source[i + 4])) {
-								return i + 4;
+								if (!MemoryManager::instance()->getIf()) {
+									return i + 4;
+								}
+								//thenが来たら考慮するべきif文が閉じた事が分かる
+								MemoryManager::instance()->minusIf();
 							}
 						}
 					}
@@ -293,17 +290,28 @@ int const ifCmd(const char* source) {
 					if (source[i + 2] == 's') {
 						if (source[i + 3] == 'e') {
 							if (isSpCharacter(source[i + 4])) {
-								return i + 4;
+								if (!MemoryManager::instance()->getIf()) {	//考慮するifの数が0だったら
+									//elseの直下にGOTOする
+									return i + 4;
+								}
 							}
 						}
 					}
 				}
 			}
+			if (source[i] == 'i') {
+				if (source[i + 1] == 'f') {
+					//ifの数を計測する
+					MemoryManager::instance()->plusIf();
+				}
+			}
 		}
-		printf("then or else is not found\n");
+		//thenの数が合わないのはifエラーとして扱う (エラービットの2番目のビット[00000010])
+		MemoryManager::instance()->setErr(0b00000010);
+		//printf("then is not found\n");
 	}
 
-	return -1;
+	return 0;
 }
 
 int const elseCmd(const char* source) {
@@ -320,10 +328,16 @@ int const elseCmd(const char* source) {
 			}
 		}
 	}
-	printf("then is not found\n");
-	return -1;
+	//thenの数が合わないのはifエラーとして扱う
+	MemoryManager::instance()->setErr(0b00000010);
+	//printf("then is not found\n");
+	return 0;
 }
 
 int const DoCmd(const char* source) {
+	return 0;
+}
+
+int const LoopCmd(const char* source) {
 	return 0;
 }

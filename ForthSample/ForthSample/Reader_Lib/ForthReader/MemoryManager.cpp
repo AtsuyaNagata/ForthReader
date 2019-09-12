@@ -1,7 +1,6 @@
 #include "Reader_lib/ForthReader/MemoryManager.h"
 #include <stdio.h>
 #include <stdlib.h>
-#define FORTH_MEMORY 2000 
 
 //緊急脱出
 void emergencyExit() {
@@ -15,7 +14,9 @@ MemoryManager* MemoryManager::mMemoryInstance = 0;
 
 MemoryManager::MemoryManager() :
 	mMemory(0),
-	mStackErr(false)
+	Ifnum(0),
+	nowLoopStack(0),
+	err(0b00000000)
 {
 	mMemory = new char[FORTH_MEMORY];
 	mEnd = &mMemory[FORTH_MEMORY];		//終了ポインタ(この地点を参照したらアウト)
@@ -49,7 +50,7 @@ void MemoryManager::destroy() {
 
 void MemoryManager::push(int param) {
 	if (pCurrent + 4 > mEnd) {
-		mStackErr = true;
+		err |= 0b00000001;
 		return;
 	}
 	char* p = reinterpret_cast<char*>(&param);
@@ -58,12 +59,12 @@ void MemoryManager::push(int param) {
 	pCurrent[2] = p[2];
 	pCurrent[3] = p[3];
 	pCurrent += 4;
-	mStackErr = false;
+	err &= 0b11111110;
 }
 
 void MemoryManager::push(float param) {
 	if (pCurrent + 4 > mEnd) {
-		mStackErr = true;
+		err |= 0b00000001;
 		return;
 	}
 	char* p = reinterpret_cast<char*>(&param);
@@ -72,15 +73,15 @@ void MemoryManager::push(float param) {
 	pCurrent[2] = p[2];
 	pCurrent[3] = p[3];
 	pCurrent += 4;
-	mStackErr = false;
+	err &= 0b11111110;
 }
 
 float MemoryManager::pop(){
 	if (pCurrent - 4 < mMemory) {
-		mStackErr = true;
+		err |= 0b00000001;
 		return 0;
 	}
 	pCurrent -= 4;
-	mStackErr = false;
+	err &= 0b11111110;
 	return *reinterpret_cast<float*>(pCurrent);
 }

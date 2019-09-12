@@ -2,7 +2,7 @@
 #define FORTH_READER_H_2019_7_3_
 
 #define MAX_CMD_VALUE 5
-#define MAX_CONTROL_VALUE 4
+#define MAX_CONTROL_VALUE 5
 
 class File;
 
@@ -32,7 +32,6 @@ public:
 	~ForthReader();
 
 private:
-	//ほんとはこいつが所有すべきではないと思う。あくまでプロトタイプだからね、仕方ないね
 	File* mFile;
 
 	ReadStatus mStatus;
