@@ -79,7 +79,7 @@ ForthReader::ForthReader() :
 		{"if", ifCmd},
 		{"else", elseCmd},
 		{"then", voidCmd},
-		{"Do", DoCmd},
+		{"DO", DoCmd},
 		{"LOOP", LoopCmd}
 	}
 {
@@ -100,7 +100,7 @@ ForthReader::ForthReader(const char* name) :
 		{"if", ifCmd},
 		{"else", elseCmd},
 		{"then", voidCmd},
-		{"Do", DoCmd},
+		{"DO", DoCmd},
 		{"LOOP", LoopCmd}
 	}
 {
@@ -335,9 +335,19 @@ int const elseCmd(const char* source) {
 }
 
 int const DoCmd(const char* source) {
+	int startI = MemoryManager::instance()->pop();
+	int maxI = MemoryManager::instance()->pop();
+	MemoryManager::instance()->pushLoopStack(startI, maxI, source);
+
 	return 0;
 }
 
 int const LoopCmd(const char* source) {
+	MemoryManager::instance()->InclementLoopI();
+	if (MemoryManager::instance()->checkI()) {
+		return 0;
+	}
+	return MemoryManager::instance()->LoopPoint() - source;
+
 	return 0;
 }

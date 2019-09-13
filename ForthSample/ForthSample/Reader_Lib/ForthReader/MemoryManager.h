@@ -2,7 +2,7 @@
 #define MEMORY_MANAGER_H_2019_6_26_
 
 #define FORTH_MEMORY 2000 
-#define LOOP_STACK_MEMORY 16
+#define LOOP_STACK_MEMORY_SIZE 16
 #include<stdio.h>
 
 //多分シングルトンになってる
@@ -37,16 +37,40 @@ public:
 		return Ifnum;
 	}
 
-	//TODO:Loop制御文
-	void pushLoopStack(int nowPoint, int LoopNum) {
-		if (++nowLoopStack >= LOOP_STACK_MEMORY) {
+	//Loop制御文
+	void pushLoopStack(int nowPoint, int maxPoint, const char* LoopNum) {
+		//ループの数が上限を超えたらエラー処理を行う
+		if (nowLoopStack + 1 >= LOOP_STACK_MEMORY_SIZE) {
+			err |= 0b00000100;
 			return;
 		}
+		//与えられた値を格納する
+		loopStack[nowLoopStack].loopI = nowPoint;
+		loopStack[nowLoopStack].maxI = maxPoint;
+		loopStack[nowLoopStack].loopPoint = LoopNum;
+		//スタックの地点を上げておく
+		++nowLoopStack;
+	}
+	bool checkI() {
+		//実体が一つでもある時には必ずnowLoopStackは1以上の値を持ってる
+		if (nowLoopStack == 0) {
+			err |= 0b00001000;
+			return 1;		//Loop処理をするーする（激うまギャグ）
+		}
+		if (loopStack[nowLoopStack - 1].loopI >= loopStack[nowLoopStack - 1].maxI) {	//ループ終了判断を行ってる
+			nowLoopStack -= 1;	//ループのスタックを一つ下げておく
+			return 1;			//Loop終了
+		}
+		return 0;
+	}
+	void InclementLoopI() {
+		loopStack[nowLoopStack - 1].loopI += 1;
+	}
+	const char* LoopPoint() {
+		return loopStack[nowLoopStack - 1].loopPoint;
 	}
 
-	void cleanErr() {
-		err = 0b00000000;
-	}
+	//エラー関数
 	void setErr(char e) {
 		err |= e;
 	}
@@ -86,11 +110,14 @@ private:
 
 	//if文用の値
 	char Ifnum;
+
 	//LOOP文用の値
 	struct {
-		unsigned int loopPoint;
+		const char* loopPoint;
 		int loopI;
-	} loopStack[LOOP_STACK_MEMORY];
+		int maxI;
+	} loopStack[LOOP_STACK_MEMORY_SIZE];
+	//ループの入れ子構造の上限
 	char nowLoopStack;
 };
 
