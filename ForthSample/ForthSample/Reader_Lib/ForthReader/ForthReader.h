@@ -1,8 +1,8 @@
 #ifndef FORTH_READER_H_2019_7_3_
 #define FORTH_READER_H_2019_7_3_
 
-#define MAX_CMD_VALUE 5
-#define MAX_CONTROL_VALUE 5
+#define MAX_CMD_VALUE 5			//ÉRÉ}ÉìÉhêî
+#define MAX_CONTROL_VALUE 5		//êßå‰ï∂ÇÃêî
 
 class File;
 
@@ -40,12 +40,12 @@ private:
 	struct
 	{
 		const char* name;
-		int const (*func)();
+		void (* const func)();
 	} forthCmd[MAX_CMD_VALUE];
 	struct
 	{
 		const char* name;
-		int const (*func)(const char* cmdName);
+		int const (* const func)(const char* cmdName);
 	} controlCmd[MAX_CONTROL_VALUE];
 };
 

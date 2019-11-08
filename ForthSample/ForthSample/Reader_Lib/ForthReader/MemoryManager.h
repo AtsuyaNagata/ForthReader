@@ -2,7 +2,7 @@
 #define MEMORY_MANAGER_H_2019_6_26_
 
 #define FORTH_MEMORY 2000 
-#define LOOP_STACK_MEMORY_SIZE 16
+#define LOOP_STACK_MEMORY_SIZE 8
 #include<stdio.h>
 
 //‘½•ªƒVƒ“ƒOƒ‹ƒgƒ“‚É‚È‚Á‚Ä‚é

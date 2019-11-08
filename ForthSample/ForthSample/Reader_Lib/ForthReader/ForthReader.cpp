@@ -53,12 +53,12 @@ double CharacterToNumber(const char* name) {
 }
 
 //コマンドの処理群
-int const voidCmd();
-int const pulusCmd();
-int const minusCmd();
-int const multipleCmd();
-int const divideCmd();
-int const printCmd();
+void voidCmd();
+void pulusCmd();
+void minusCmd();
+void multipleCmd();
+void divideCmd();
+void printCmd();
 int const voidCmd(const char*);
 int const ifCmd(const char*);
 int const elseCmd(const char*);
@@ -99,7 +99,7 @@ ForthReader::ForthReader(const char* name) :
 	controlCmd{
 		{"if", ifCmd},
 		{"else", elseCmd},
-		{"then", voidCmd},
+		{"then", voidCmd},  //then構文は何もしない
 		{"DO", DoCmd},
 		{"LOOP", LoopCmd}
 	}
@@ -140,12 +140,21 @@ void ForthReader::readForth(const char* source)
 	char cmd[MAX_CMDLENGTH + 1];
 	int i = 0, j = 0, temp = 0;
 	while (p[i] != '\0') {
-		if (isNumber(p[i])) {
-			mem->push(static_cast<float>(CharacterToNumber(&p[i])));
-			for (; !isSpCharacter(p[i]); ++i)
+		if (isNumber(p[i]) ||( p[i] == '-' && isNumber(p[i + 1]))) {
+			if (p[i] == '-') {
+				float buf = -1 * CharacterToNumber(&p[i + 1]);
+				mem->push(static_cast<float>(buf));
+			}
+			else {
+				mem->push(static_cast<float>(CharacterToNumber(&p[i])));
+			}
+			for ( ++i; !isSpCharacter(p[i]); ++i)
 				if (!isNumber(p[i]) && p[i] != '.')		//不正な文字を検出する
 					mem->pop();							//不正な数字を吐き出す
 			for (; !isSpCharacter(p[i]); ++i);			//iの値を進めておく
+		}
+		else if (isSpCharacter(p[i])) {
+			//もし、改行や空白だったら何もしない
 		}
 		else {
 			for (int j = 0; j < MAX_CMDLENGTH + 1; ++j) { cmd[j] = '\0'; }	//cmdをクリーンする
@@ -180,7 +189,6 @@ int ForthReader::executCmd(const char* cmdName) {
 	for (int i = 0; i < MAX_CONTROL_VALUE; ++i) {
 		if (!strcmp(controlCmd[i].name, cmdName)) {
 			return MemoryManager::instance()->checkError();
-			return 0;
 		}
 	}
 	printf("%s is not defined", cmdName);
@@ -197,65 +205,58 @@ int ForthReader::executControl(const char* source, const char* cmdName) {
 }
 
 //何もしない事が保証されたコマンド関数
-int const voidCmd() {
-	return 0;
-}
+void voidCmd() {}
 
 //足し算関数  1はスタックエラー
-int const pulusCmd() {
+void pulusCmd() {
 	float ans = MemoryManager::instance()->pop() + MemoryManager::instance()->pop();
 	if (MemoryManager::instance()->isStackErr()) {
-		return 1;		//スタックエラー
+		return;
 	}
 	//2つポップして一つプッシュだからエラーの確認はなしでよい
 	MemoryManager::instance()->push(ans);
-	return 0;
 }
 
 //引き算関数
-int const minusCmd() {
-	float ans = -MemoryManager::instance()->pop() + MemoryManager::instance()->pop();
+void minusCmd() {
+	float ans = MemoryManager::instance()->pop() - MemoryManager::instance()->pop();
 	if (MemoryManager::instance()->isStackErr()) {
-		return 1;		//スタックエラー
+		return;
 	}
 	//2つポップして一つプッシュだからエラーの確認はなしでよい
 	MemoryManager::instance()->push(ans);
-	return 0;
 }
 
 //かけ算関数
-int const multipleCmd() {
+void multipleCmd() {
 	float ans = MemoryManager::instance()->pop() * MemoryManager::instance()->pop();
 	if (MemoryManager::instance()->isStackErr()) {
-		return 1;		//スタックエラー
+		return;
 	}
 	//2つポップして一つプッシュだからエラーの確認はなしでよい
 	MemoryManager::instance()->push(ans);
-	return 0;
 }
 
 //割り算関数
-int const divideCmd() {
+void divideCmd() {
 	float divideBuff = MemoryManager::instance()->pop();
 	float ans = MemoryManager::instance()->pop() / divideBuff;
 	if (MemoryManager::instance()->isStackErr()) {
-		return 1;		//スタックエラー
+		return;
 	}
 	//2つポップして一つプッシュだからエラーの確認はなしでよい
 	MemoryManager::instance()->push(ans);
-	return 0;
 }
 
 //出力関数(スタックの一番上をポップして出力する)
-int const printCmd() {
-	float printBuff = MemoryManager::instance()->pop();
+void printCmd() {
+	float prvoidBuff = MemoryManager::instance()->pop();
 	if (MemoryManager::instance()->isStackErr()) {
-		return 1;		//スタックエラー
+		return;
 	}
 	//改行までが責任とする
 	printf("output : ");
-	printf("%f\n", printBuff);
-	return 0;
+	printf("%f\n", prvoidBuff);
 }
 
 int const voidCmd(const char* source) {
@@ -275,10 +276,11 @@ int const ifCmd(const char* source) {
 					if (source[i + 2] == 'e') {
 						if (source[i + 3] == 'n') {
 							if (isSpCharacter(source[i + 4])) {
+								//入れ子のifがすべて閉じた状態であれば(そもそも入れ子構造でない時も通る)
 								if (!MemoryManager::instance()->getIf()) {
 									return i + 4;
 								}
-								//thenが来たら考慮するべきif文が閉じた事が分かる
+								//thenが来たら考慮するべきif文が一つ閉じた事が分かる
 								MemoryManager::instance()->minusIf();
 							}
 						}
@@ -335,8 +337,11 @@ int const elseCmd(const char* source) {
 }
 
 int const DoCmd(const char* source) {
+	//LOOPの開始値
 	int startI = MemoryManager::instance()->pop();
+	//LOOPの終了値
 	int maxI = MemoryManager::instance()->pop();
+	//データをLOOPスタックに積む
 	MemoryManager::instance()->pushLoopStack(startI, maxI, source);
 
 	return 0;
@@ -347,6 +352,7 @@ int const LoopCmd(const char* source) {
 	if (MemoryManager::instance()->checkI()) {
 		return 0;
 	}
+	//LOOPスタックの一番上の値を参照して、それのLoopPointからLoop開始地点が分かる
 	return MemoryManager::instance()->LoopPoint() - source;
 
 	return 0;

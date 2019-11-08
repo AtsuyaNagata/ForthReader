@@ -20,7 +20,7 @@ MemoryManager::MemoryManager() :
 {
 	mMemory = new char[FORTH_MEMORY];
 	mEnd = &mMemory[FORTH_MEMORY];		//終了ポインタ(この地点を参照したらアウト)
-	pCurrent = mMemory;
+	pCurrent = mMemory + 8;				//開幕2ポップによるアクセス違反の可能性があるから+8
 }
 
 MemoryManager::~MemoryManager() {
