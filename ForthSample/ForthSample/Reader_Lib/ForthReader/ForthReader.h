@@ -1,7 +1,7 @@
 #ifndef FORTH_READER_H_2019_7_3_
 #define FORTH_READER_H_2019_7_3_
 
-#define MAX_CMD_VALUE 5			//コマンド数
+#define MAX_CMD_VALUE 9			//コマンド数
 #define MAX_CONTROL_VALUE 5		//制御文の数
 
 class File;

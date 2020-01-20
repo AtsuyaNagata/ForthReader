@@ -1,7 +1,7 @@
 #ifndef MEMORY_MANAGER_H_2019_6_26_
 #define MEMORY_MANAGER_H_2019_6_26_
 
-#define FORTH_MEMORY 2000 
+#define FORTH_MEMORY 2048
 #define LOOP_STACK_MEMORY_SIZE 8
 #include<stdio.h>
 
@@ -26,15 +26,8 @@ public:
 		return 0b0000000001 && err;
 	}
 
-	//if制御文
-	void minusIf() {
-		Ifnum -= 1;
-	}
-	void plusIf() {
-		Ifnum += 1;
-	}
-	int getIf() {
-		return Ifnum;
+	float* getVariableMemory() {
+		return mVariable;
 	}
 
 	//Loop制御文
@@ -75,16 +68,17 @@ public:
 		err |= e;
 	}
 	bool checkError() {
+		int errNum = 0;
 		if (err & 0b00000001) {
 			printf("stack error\n");
-			return 1;
+			errNum = 1;
 		}
 		if (err & 0b00000010) {
 			printf("then is not found\n");
-			return 1;
+			errNum = 1;
 		}
 
-		return 0;		//エラーなし
+		return errNum;		//0:エラーなし
 	}
 
 	void push(int);
@@ -98,18 +92,18 @@ private:
 	//シングルトンの実体を指すポインタ
 	static MemoryManager* mMemoryInstance;
 
-	//メモリー系のメンバ
+	//スタックメモリー系のメンバ
 	char *mMemory;
 	char *mEnd;
+
+	//変数領域
+	float* mVariable;
 
 	//動かしてもよいポインタ
 	char* pCurrent;
 
 	//エラーのフラグを格納する変数
 	char err;
-
-	//if文用の値
-	char Ifnum;
 
 	//LOOP文用の値
 	struct {

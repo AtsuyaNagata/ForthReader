@@ -14,13 +14,16 @@ MemoryManager* MemoryManager::mMemoryInstance = 0;
 
 MemoryManager::MemoryManager() :
 	mMemory(0),
-	Ifnum(0),
 	nowLoopStack(0),
 	err(0b00000000)
 {
 	mMemory = new char[FORTH_MEMORY];
 	mEnd = &mMemory[FORTH_MEMORY];		//終了ポインタ(この地点を参照したらアウト)
 	pCurrent = mMemory + 8;				//開幕2ポップによるアクセス違反の可能性があるから+8
+	mVariable = new float[26];			//アルファベット分のメモリ確保
+	for (int i = 0; i < 26; ++i) {
+		mVariable[i] = 0;				//0で埋めておく
+	}
 }
 
 MemoryManager::~MemoryManager() {

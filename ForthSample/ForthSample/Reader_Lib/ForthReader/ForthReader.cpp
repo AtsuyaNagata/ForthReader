@@ -59,6 +59,10 @@ void minusCmd();
 void multipleCmd();
 void divideCmd();
 void printCmd();
+void smallerCmd();
+void greaterCmd();
+void equalCmd();
+void emitCmd();
 int const voidCmd(const char*);
 int const ifCmd(const char*);
 int const elseCmd(const char*);
@@ -73,7 +77,11 @@ ForthReader::ForthReader() :
 		{"-", minusCmd},
 		{"*", multipleCmd},
 		{"/", divideCmd},
-		{".", printCmd}
+		{".", printCmd},
+		{"<", smallerCmd},
+		{">", greaterCmd},
+		{"=", equalCmd},
+		{"emit", emitCmd}
 	},
 	controlCmd{
 		{"if", ifCmd},
@@ -94,7 +102,11 @@ ForthReader::ForthReader(const char* name) :
 		{"-", minusCmd},
 		{"*", multipleCmd},
 		{"/", divideCmd},
-		{".", printCmd}
+		{".", printCmd},
+		{"<", smallerCmd},
+		{">", greaterCmd},
+		{"=", equalCmd},
+		{"emit", emitCmd}
 	},
 	controlCmd{
 		{"if", ifCmd},
@@ -113,7 +125,6 @@ ForthReader::~ForthReader() {
 		delete mFile;
 	}
 }
-
 
 void ForthReader::read()
 {
@@ -153,6 +164,21 @@ void ForthReader::readForth(const char* source)
 					mem->pop();							//不正な数字を吐き出す
 			for (; !isSpCharacter(p[i]); ++i);			//iの値を進めておく
 		}
+		else if (p[i] >= 'a' && p[i] <= 'z' && isSpCharacter(p[i + 1])) {	//a～zまでの値が単体であった時の処理
+			float* variable = mem->getVariableMemory();	//変数領域のメモリを獲得
+			char variableIndex = p[i] - 'a';			//なんの変数かを識別する
+			i += 2;
+			for (; isSpCharacter(p[i]); ++i);			//次の文字まで飛ばす
+			if (p[i] == '@') {
+				mem->push(variable[variableIndex]);		//変数の値をスタックに入れる
+			}
+			else if (p[i] == '!') {
+				variable[variableIndex] = mem->pop();	//スタックからポップした値を変数に入れる
+			}
+			else {
+				//何もしない
+			}
+		}
 		else if (isSpCharacter(p[i])) {
 			//もし、改行や空白だったら何もしない
 		}
@@ -174,7 +200,7 @@ void ForthReader::readForth(const char* source)
 		}
 		i = i + 1;
 	}
-}
+}//-43602080
 
 //コマンド確定、実行するマン
 int ForthReader::executCmd(const char* cmdName) {
@@ -219,7 +245,7 @@ void pulusCmd() {
 
 //引き算関数
 void minusCmd() {
-	float ans = MemoryManager::instance()->pop() - MemoryManager::instance()->pop();
+	float ans = -MemoryManager::instance()->pop() + MemoryManager::instance()->pop();
 	if (MemoryManager::instance()->isStackErr()) {
 		return;
 	}
@@ -248,6 +274,33 @@ void divideCmd() {
 	MemoryManager::instance()->push(ans);
 }
 
+void smallerCmd() {
+	float ans = MemoryManager::instance()->pop() > MemoryManager::instance()->pop();
+	if (MemoryManager::instance()->isStackErr()) {
+		return;
+	}
+	//2つポップして一つプッシュだからエラーの確認はなしでよい
+	MemoryManager::instance()->push(ans);
+}
+
+void greaterCmd() {
+	float ans = MemoryManager::instance()->pop() < MemoryManager::instance()->pop();
+	if (MemoryManager::instance()->isStackErr()) {
+		return;
+	}
+	//2つポップして一つプッシュだからエラーの確認はなしでよい
+	MemoryManager::instance()->push(ans);
+}
+
+void equalCmd() {
+	float ans = MemoryManager::instance()->pop() == MemoryManager::instance()->pop();
+	if (MemoryManager::instance()->isStackErr()) {
+		return;
+	}
+	//2つポップして一つプッシュだからエラーの確認はなしでよい
+	MemoryManager::instance()->push(ans);
+}
+
 //出力関数(スタックの一番上をポップして出力する)
 void printCmd() {
 	float prvoidBuff = MemoryManager::instance()->pop();
@@ -259,6 +312,16 @@ void printCmd() {
 	printf("%f\n", prvoidBuff);
 }
 
+//出力関数(スタックの一番上をポップして出力する)
+void emitCmd() {
+	int prvoidBuff = MemoryManager::instance()->pop();
+	if (MemoryManager::instance()->isStackErr()) {
+		return;
+	}
+	//改行までが責任とする
+	printf("%c", prvoidBuff);
+}
+
 int const voidCmd(const char* source) {
 	return 0;
 }
@@ -266,6 +329,7 @@ int const voidCmd(const char* source) {
 //sourceは先頭ポインタではなく、現在読んでいる地点のポインタ
 int const ifCmd(const char* source) {
 	int ifBuff = MemoryManager::instance()->pop();
+	int ifnum = 0;
 	if (ifBuff) {	//trueの時
 		return 0;
 	}
@@ -277,11 +341,11 @@ int const ifCmd(const char* source) {
 						if (source[i + 3] == 'n') {
 							if (isSpCharacter(source[i + 4])) {
 								//入れ子のifがすべて閉じた状態であれば(そもそも入れ子構造でない時も通る)
-								if (!MemoryManager::instance()->getIf()) {
+								if (!ifnum) {
 									return i + 4;
 								}
 								//thenが来たら考慮するべきif文が一つ閉じた事が分かる
-								MemoryManager::instance()->minusIf();
+								ifnum--;
 							}
 						}
 					}
@@ -292,7 +356,7 @@ int const ifCmd(const char* source) {
 					if (source[i + 2] == 's') {
 						if (source[i + 3] == 'e') {
 							if (isSpCharacter(source[i + 4])) {
-								if (!MemoryManager::instance()->getIf()) {	//考慮するifの数が0だったら
+								if (!ifnum) {	//考慮するifの数が0だったら
 									//elseの直下にGOTOする
 									return i + 4;
 								}
@@ -304,7 +368,7 @@ int const ifCmd(const char* source) {
 			if (source[i] == 'i') {
 				if (source[i + 1] == 'f') {
 					//ifの数を計測する
-					MemoryManager::instance()->plusIf();
+					ifnum++;
 				}
 			}
 		}
@@ -354,6 +418,4 @@ int const LoopCmd(const char* source) {
 	}
 	//LOOPスタックの一番上の値を参照して、それのLoopPointからLoop開始地点が分かる
 	return MemoryManager::instance()->LoopPoint() - source;
-
-	return 0;
 }
